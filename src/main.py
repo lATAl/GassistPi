@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from kodijson import Kodi, PLAYER_VIDEO
-import RPi.GPIO as GPIO
 import argparse
 import os.path
 import os
@@ -32,31 +30,7 @@ from actions import radio
 from actions import ESP
 from actions import track
 from actions import feed
-from actions import kodiactions
 from actions import mutevolstatus
-
-#Login with default kodi/kodi credentials
-#kodi = Kodi("http://localhost:8080/jsonrpc")
-
-#Login with custom credentials
-# Kodi("http://IP-ADDRESS-OF-KODI:8080/jsonrpc", "username", "password")
-kodi = Kodi("http://192.168.1.15:8080/jsonrpc", "kodi", "kodi")
-
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-
-#Indicator Pins
-GPIO.setup(25, GPIO.OUT)
-GPIO.setup(5, GPIO.OUT)
-GPIO.setup(6, GPIO.OUT)
-GPIO.output(5, GPIO.LOW)
-GPIO.output(6, GPIO.LOW)
-led=GPIO.PWM(25,1)
-led.start(0)
-
-
-
 
 def process_event(event):
     """Pretty prints events.
@@ -73,29 +47,13 @@ def process_event(event):
         vollevel=status[1]
         with open('/home/pi/.volume.json', 'w') as f:
                json.dump(vollevel, f)
-        kodi.Application.SetVolume({"volume": 0})
-        GPIO.output(5,GPIO.HIGH)
-        led.ChangeDutyCycle(100)
-
-    if (event.type == EventType.ON_RESPONDING_STARTED and event.args and not event.args['is_error_response']):
-       GPIO.output(5,GPIO.LOW)
-       GPIO.output(6,GPIO.HIGH)
-       led.ChangeDutyCycle(50)
-
-    if event.type == EventType.ON_RESPONDING_FINISHED:
-       GPIO.output(6,GPIO.LOW)
-       GPIO.output(5,GPIO.HIGH)
-       led.ChangeDutyCycle(100)
 
     print(event)
 
     if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
             event.args and not event.args['with_follow_on_turn']):
-        GPIO.output(5,GPIO.LOW)
-        led.ChangeDutyCycle(0)
         with open('/home/pi/.volume.json', 'r') as f:
                vollevel = json.load(f)
-               kodi.Application.SetVolume({"volume": vollevel})
         print()
 
 
@@ -141,9 +99,6 @@ def main():
             if 'news'.lower() in str(usrcmd).lower() or 'feed'.lower() in str(usrcmd).lower() or 'quote'.lower() in str(usrcmd).lower():
                 assistant.stop_conversation()
                 feed(str(usrcmd).lower())
-            if 'on kodi'.lower() in str(usrcmd).lower():
-                assistant.stop_conversation()
-                kodiactions(str(usrcmd).lower())
 
 if __name__ == '__main__':
     main()

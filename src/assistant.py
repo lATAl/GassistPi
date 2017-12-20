@@ -26,7 +26,6 @@ import grpc
 import google.auth.transport.grpc
 import google.auth.transport.requests
 import google.oauth2.credentials
-import RPi.GPIO as GPIO
 from google.assistant.embedded.v1alpha1 import embedded_assistant_pb2
 from google.rpc import code_pb2
 from tenacity import retry, stop_after_attempt, retry_if_exception
@@ -37,7 +36,6 @@ from actions import radio
 from actions import ESP
 from actions import track
 from actions import feed
-from actions import kodiactions
 from actions import mutevolstatus
 
 try:
@@ -48,27 +46,6 @@ try:
 except SystemError:
     import assistant_helpers
     import audio_helpers
-
-#Login with default kodi/kodi credentials
-#kodi = Kodi("http://localhost:8080/jsonrpc")
-
-#Login with custom credentials
-# Kodi("http://IP-ADDRESS-OF-KODI:8080/jsonrpc", "username", "password")
-kodi = Kodi("http://192.168.1.15:8080/jsonrpc", "kodi", "kodi")
-
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-
-#Indicator pins declaration
-GPIO.setup(25, GPIO.OUT)
-GPIO.setup(5,GPIO.OUT)
-GPIO.setup(6,GPIO.OUT)
-GPIO.output(5, GPIO.LOW)
-GPIO.output(6, GPIO.LOW)
-led=GPIO.PWM(25,1)
-led.start(0)
-
 
 ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
 END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
@@ -167,9 +144,6 @@ class Assistant():
                 vollevel=status[1]
                 with open('/home/pi/.volume.json', 'w') as f:
                        json.dump(vollevel, f)
-                kodi.Application.SetVolume({"volume": 0})
-                GPIO.output(5,GPIO.HIGH)
-                led.ChangeDutyCycle(100)
                 self.logger.info('Recording audio request.')
 
                 def iter_converse_requests():
@@ -188,8 +162,6 @@ class Assistant():
                         break
                     if resp.event_type == END_OF_UTTERANCE:
                         self.logger.info('End of audio request detected')
-                        GPIO.output(5,GPIO.LOW)
-                        led.ChangeDutyCycle(0)
                         self.conversation_stream.stop_recording()
                     if resp.result.spoken_request_text:
                         usrcmd=resp.result.spoken_request_text
@@ -214,16 +186,10 @@ class Assistant():
                         if 'news'.lower() in str(usrcmd).lower() or 'feed'.lower() in str(usrcmd).lower() or 'quote'.lower() in str(usrcmd).lower():
                             feed(str(usrcmd).lower())
                             return continue_conversation
-                        if 'on kodi'.lower() in str(usrcmd).lower():
-                            kodiactions(str(usrcmd).lower())
-                            return continue_conversation
                         else:
                             continue
                         self.logger.info('Transcript of user request: "%s".',
                                      resp.result.spoken_request_text)
-                        GPIO.output(5,GPIO.LOW)
-                        GPIO.output(6,GPIO.HIGH)
-                        led.ChangeDutyCycle(50)
                         self.logger.info('Playing assistant response.')
                     if len(resp.audio_out.audio_data) > 0:
                         self.conversation_stream.write(resp.audio_out.audio_data)
@@ -239,17 +205,10 @@ class Assistant():
                         self.logger.info('Volume should be set to %s%%', volume_percentage)
                     if resp.result.microphone_mode == DIALOG_FOLLOW_ON:
                         continue_conversation = True
-                        GPIO.output(6,GPIO.LOW)
-                        GPIO.output(5,GPIO.HIGH)
-                        led.ChangeDutyCycle(100)
                         self.logger.info('Expecting follow-on query from user.')
                 self.logger.info('Finished playing assistant response.')
-                GPIO.output(6,GPIO.LOW)
-                GPIO.output(5,GPIO.LOW)
-                led.ChangeDutyCycle(0)
                 with open('/home/pi/.volume.json', 'r') as f:
                        vollevel = json.load(f)
-                       kodi.Application.SetVolume({"volume": vollevel})
                 self.conversation_stream.stop_playback()
         except Exception as e:
             self._create_assistant()
