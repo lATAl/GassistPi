@@ -29,9 +29,11 @@ def interrupt_callback():
 gassist = Assistant()
 
 def detected():
+    global callbacks
     detector.terminate()
     snowboydecoder.play_audio_file(snowboydecoder.DETECT_DING)
     gassist.assist()
+    snowboydecoder.play_audio_file(snowboydecoder.DETECT_DONG)
     detector.start(detected_callbacs=callbacks,
                    interrupt_check=interrupt_callback,
                    sleep_time=0.03)
