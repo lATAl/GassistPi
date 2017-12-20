@@ -164,7 +164,7 @@ class Assistant():
                         if 'trigger' in str(usrcmd).lower():
                             Action(str(usrcmd).lower())
                             return continue_conversation
-                        if 'stream'.lower() in str(usrcmd).lower():
+                        if 'play'.lower() in str(usrcmd).lower():
                             # YouTube(str(usrcmd).lower())
                             youtube_search(str(usrcmd).lower())
                             return continue_conversation
