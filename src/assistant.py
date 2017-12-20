@@ -165,7 +165,8 @@ class Assistant():
                             Action(str(usrcmd).lower())
                             return continue_conversation
                         if 'stream'.lower() in str(usrcmd).lower():
-                            YouTube(str(usrcmd).lower())
+                            # YouTube(str(usrcmd).lower())
+                            youtube_search(str(usrcmd).lower())
                             return continue_conversation
                         if 'stop'.lower() in str(usrcmd).lower():
                             stop()
@@ -182,22 +183,6 @@ class Assistant():
                         if 'news'.lower() in str(usrcmd).lower() or 'feed'.lower() in str(usrcmd).lower() or 'quote'.lower() in str(usrcmd).lower():
                             feed(str(usrcmd).lower())
                             return continue_conversation
-                        if 'youtube'.lower() in str(usrcmd).lower():
-                            assistant.stop_conversation()
-                            query=str(usrcmd).lower()
-                            idx=query.find('play')
-                            track=query[idx:]
-                            track=track.replace("'}", "",1)
-                            track = track.replace('play','',1)
-                            if 'youtube'.lower() in track:
-                                track=track.replace('youtube','',1)
-                            elif 'video'.lower() in track:
-                                track=track.replace('video','',1)
-                            else:
-                                track=track.strip()
-                            print(track)
-                            say("Fetching YouTube links for, "+track)
-                            youtube_search(track)
                         else:
                             continue
                         self.logger.info('Transcript of user request: "%s".',

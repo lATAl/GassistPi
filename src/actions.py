@@ -90,6 +90,8 @@ def YouTube(phrase):
     playshell.stdin.write(bytes('/' + track + '\n1\n','utf-8'))
     playshell.stdin.flush()
 
+    pkill = subprocess.Popen(["/usr/bin/pkill","vlc"],stdin=subprocess.PIPE)
+
 def stop():
     pkill = subprocess.Popen(["/usr/bin/pkill","vlc"],stdin=subprocess.PIPE)
 
