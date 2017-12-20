@@ -36,7 +36,6 @@ from actions import radio
 from actions import ESP
 from actions import track
 from actions import feed
-from actions import mutevolstatus
 
 try:
     from googlesamples.assistant.grpc import (
@@ -140,10 +139,6 @@ class Assistant():
                 continue_conversation = False
                 subprocess.Popen(["aplay", "/home/pi/GassistPi/sample-audio-files/Fb.wav"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 self.conversation_stream.start_recording()
-                status=mutevolstatus()
-                vollevel=status[1]
-                with open('/home/pi/.volume.json', 'w') as f:
-                       json.dump(vollevel, f)
                 self.logger.info('Recording audio request.')
 
                 def iter_converse_requests():
@@ -207,8 +202,6 @@ class Assistant():
                         continue_conversation = True
                         self.logger.info('Expecting follow-on query from user.')
                 self.logger.info('Finished playing assistant response.')
-                with open('/home/pi/.volume.json', 'r') as f:
-                       vollevel = json.load(f)
                 self.conversation_stream.stop_playback()
         except Exception as e:
             self._create_assistant()

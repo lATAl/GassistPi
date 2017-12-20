@@ -43,17 +43,10 @@ def process_event(event):
     """
     if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
         subprocess.Popen(["aplay", "/home/pi/GassistPi/sample-audio-files/Fb.wav"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        status=mutevolstatus()
-        vollevel=status[1]
-        with open('/home/pi/.volume.json', 'w') as f:
-               json.dump(vollevel, f)
-
     print(event)
 
     if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
             event.args and not event.args['with_follow_on_turn']):
-        with open('/home/pi/.volume.json', 'r') as f:
-               vollevel = json.load(f)
         print()
 
 
