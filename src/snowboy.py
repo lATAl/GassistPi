@@ -7,6 +7,8 @@ import subprocess
 from assistant import Assistant
 subprocess.Popen(["aplay", "/home/pi/GassistPi/sample-audio-files/customwakeword.wav"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+interrupted = False
+
 #Add your custom models here
 models = ['/home/pi/GassistPi/src/resources/alexa.umdl', '/home/pi/GassistPi/src/resources/snowboy.umdl']
 
@@ -33,8 +35,6 @@ def detected():
     detector.start(detected_callbacs=callbacks,
                    interrupt_check=interrupt_callback,
                    sleep_time=0.03)
-
-
 
 # capture SIGINT signal, e.g., Ctrl+C
 signal.signal(signal.SIGINT, signal_handler)
